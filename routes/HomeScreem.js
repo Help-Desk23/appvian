@@ -1,3 +1,52 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+
+const HomeScreem = () => {
+
+  const [data, setData] = useState([]);
+
+  const fetchMoto = async () => {
+    try{
+      const response = await axios.get("http://192.168.2.246:3000/motos");
+      setData(response.data);
+    } catch(error) {
+      console.error("Error al obtener los datos", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMoto();
+  },[]);
+
+
+  return ( 
+    <ScrollView>
+      <View>
+        <Text>Hola Mundo</Text>
+        {
+          data.map((moto, index) => (
+            <Text> {moto.modelo}</Text>
+          ))
+        }
+      </View>
+    </ScrollView>
+   );
+}
+ 
+export default HomeScreem;
+
+
+
+
+
+
+
+
+
+
+
+/*
 import React, { useEffect, useState } from "react";
 import { Text, View, Alert, Image, Button, TouchableHighlight, ScrollView, TextInput } from "react-native";
 import { StyleSheet } from "react-native";
@@ -230,3 +279,4 @@ const styles = StyleSheet.create({
 })
 
 export default HomeScreem;
+*/

@@ -20,7 +20,7 @@ import SettingScreem from './routes/SettingScreem';
 
 function LoginScreem (){
 
-  const url = 'http://10.0.2.2:3000/loginasesores';
+  const url = 'http://192.168.2.246:3000/login';
 
   const [usuario, setUsername] = React.useState('');
   const [contraseña, setPassword] = React.useState('');

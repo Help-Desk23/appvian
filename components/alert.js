@@ -13,7 +13,7 @@ const Alertproforma = ({visible, message, onClose}) => {
     useEffect(() => {
       const fetchCliente = async () => {
         try {
-          const response = await axios.get('http://10.0.2.2:3000/cliente');
+          const response = await axios.get('http://10.0.2.2:3000/clientes');
           console.log(response.data)
           setCliente(response.data);
         } catch (error) {
@@ -37,8 +37,8 @@ const Alertproforma = ({visible, message, onClose}) => {
                 <Image source={fondo} style={[styles.image, StyleSheet.absoluteFill]} />
             </View>
         {cliente && cliente.map((clienteInfo) => (
-        <View key={clienteInfo.id}>
-          <Image source={{uri: clienteInfo.img_moto}} style={ styles.img_motos}/>
+        <View key={clienteInfo.id_motos}>
+          <Image source={{uri: clienteInfo.img_motos}} style={ styles.img_motos}/>
         </View>
       ))}
         </Modal>
