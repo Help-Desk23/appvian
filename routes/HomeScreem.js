@@ -1,10 +1,28 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { cloneElement, useEffect, useState } from "react";
+import { ScrollView, Text, View, Image, TextInput, TouchableHighlight} from "react-native";
+import { StyleSheet } from "react-native";
+import RNPickerSelect from 'react-native-picker-select';
+
+// IMG HONDA
+import Honda from '../assets/hondavi.png';
+
+
+
+
 
 const HomeScreem = () => {
 
   const [data, setData] = useState([]);
+  const [selectedValue, setSelectedValue] = useState(null);
+  const [precioDolares, setPrecioDolares] = useState('');
+  const [precioBolivianos, setPrecioBolivianos] = useState('');
+  const [inicialDolares, setInicialDolares] = useState('');
+  const [inicialBolivianos, setInicialBolivianos] = useState('');
+  const [imagen, setImagen] = useState('');
+  const [showAlert, setShowAlert] = useState(null);
+
+  const tipoCambio = 6.97;
 
   const fetchMoto = async () => {
     try{
@@ -19,63 +37,44 @@ const HomeScreem = () => {
     fetchMoto();
   },[]);
 
+  const handleModeloChange = (value) => {
+    setSelectedValue(value);
+    const motoSeleccionada = data.find(moto => moto.id_motos === value);
+    if (motoSeleccionada) {
+      setImagen(motoSeleccionada.img_motos);
+      setPrecioDolares(motoSeleccionada.precious);
+      setPrecioBolivianos((motoSeleccionada.precious * tipoCambio).toFixed(2));
+    } else {
+      setPrecioDolares('');
+      setPrecioBolivianos('');
+      setImagen('');
+    }
+  };
 
-  return ( 
-    <ScrollView>
-      <View>
-        <Text>Hola Mundo</Text>
-        {
-          data.map((moto, index) => (
-            <Text> {moto.modelo}</Text>
-          ))
-        }
-      </View>
-    </ScrollView>
-   );
-}
- 
-export default HomeScreem;
+  const handleInicialDolaresChange = (text) => {
+    setInicialDolares(text);
+    
+    if (!isNaN(parseFloat(text))) {
+      
+      const inicialBs = parseFloat(text) * tipoCambio;
+      setInicialBolivianos(inicialBs.toFixed(2));
+    }
+  };
 
+  const handleInicialBolivianosChange  = (text) => {
+    setInicialBolivianos(text);
 
-
-
-
-
-
-
-
-
-
-/*
-import React, { useEffect, useState } from "react";
-import { Text, View, Alert, Image, Button, TouchableHighlight, ScrollView, TextInput } from "react-native";
-import { StyleSheet } from "react-native";
-import Honda from '../assets/hondavi.png';
-import RNPickerSelect from 'react-native-picker-select';
-import motoData from "../motosdata";
-import Alertproforma from "../components/alert";
+    if(!isNaN(parseFloat(text))) {
+      const inicialDolares = parseFloat(text) / tipoCambio;
+      setInicialDolares(inicialDolares.toFixed(2));
+    }
+  };
 
 
-const HomeScreem = () => {
+  // POST CLIENTES
 
-  const motos = motoData.motos
 
-  const [selectedValue, setSelectedValue] = useState(null);
-  const [selectedPlazo, setSelectedPlazo] = useState(null);
-  const [precioDolares, setPrecioDolares] = useState('');
-  const [precioBolivianos, setPrecioBolivianos] = useState('');
-  const [inicialDolares, setInicialDolares] = useState('');
-  const [inicialBolivianos, setInicialBolivianos] = useState('');
-  const [imagen, setImagen] = useState(require('../assets/Navi/navi.png'));
-  const [showAlert, setShowAlert] = useState(null);
 
-  const tipoCambio  = 6.97
-
-  const Myplazo = [
-    {label: '12 MESES', value: '12 MESES'},
-    {label: '18 MESES', value: '18 MESES'},
-    {label: '24 MESES', value: '24 MESES'},
-  ]
 
   const handlePress = () => {
     setShowAlert(true);
@@ -84,65 +83,40 @@ const HomeScreem = () => {
   const handleClose = () => {
     setShowAlert(false);
   };
-
-  const handleModeloChange = async (value) => {
-    setSelectedValue(value);
-    const motoSeleccionada = motos.find(moto => moto.id === value);
-    if (motoSeleccionada) {
-      setPrecioDolares(motoSeleccionada.preciosus);
-      const precioBs = parseFloat(motoSeleccionada.preciosus.replace(/\$/, '')) * tipoCambio;
-      setPrecioBolivianos(precioBs.toFixed(2));
-      setImagen(motoSeleccionada.img_motos);
-    } else {
-      setPrecioDolares('');
-      setPrecioBolivianos('');
-      setImagen('');
-    }
-  };
   
-  const handleInicialDolaresChange = (text) => {
-    setInicialDolares(text);
-    
-    if (!isNaN(parseFloat(text))) {
-      
-      const inicialBs = parseFloat(text) * tipoCambio;
-      setInicialBolivianos(inicialBs.toFixed(2));
-    } else {
-      
-      setInicialBolivianos('PRECIO Bs.');
-    }
-  };
 
-  return(
-    <ScrollView >
-    <View style = { styles.container }>
-      <Image source = { Honda } style = { styles.icon }/>
-      <Text style = { styles.proforma }>PROFORMA</Text> 
-      <Image source={imagen} style = { styles.nrojo } />
-      <TextInput placeholder= "NOMBRE DEL CLIENTE"  style = { styles.textInput }/>
-      <TextInput placeholder= "TELEFONO DEL CLIENTE" style = { styles.textInput } />
-      <Text style = { styles.textM }> MODELO </Text>
-      <View style = { styles.select }>
-        <RNPickerSelect
-        placeholder={{label: 'Seleccione una moto', value: null}}
-        items={motos.map(moto => ({ label: moto.modelo, value: moto.id }))}
-        onValueChange={handleModeloChange}
-        value={ selectedValue }
-         />
-         </View>
-      <Text style = { styles.textM }> PLAZO </Text>
-      <View style = { styles.select }>
-        <RNPickerSelect
-        placeholder={{label: 'Seleccione un plazo', value: null}}
-        items={ Myplazo }
-        onValueChange={(value) => setSelectedPlazo(value)}
-        value={ selectedPlazo } 
-        />
-      </View>
-      <View style = { styles.monedas }>
-        <Text style = { styles.text }>$US</Text>
-        <Text style = { styles.text }>BS</Text>
-      </View>
+
+  return ( 
+    <ScrollView>
+      <View style={ styles.container }>
+        <Image source = { Honda } style = { styles.icon }/>
+        <Text style = { styles.proforma }>PROFORMA</Text>
+        <Image source={imagen ? { uri: imagen } : require('../assets/Navi/navi.png')} style={ styles.motosh} />
+        <TextInput placeholder= "NOMBRE DEL CLIENTE"  style = { styles.textInput }/>
+        <TextInput placeholder= "TELEFONO DEL CLIENTE" style = { styles.textInput } keyboardType="numeric" />
+        <Text style = { styles.textM }> MODELO </Text>
+        <View style = { styles.select }>
+          <RNPickerSelect
+            placeholder={{ label: 'Seleccione una moto', value: null }}
+            items={data.map(moto => ({ label: moto.modelo, value: moto.id_motos }))}
+            onValueChange={handleModeloChange}
+            value={selectedValue}
+          />
+        </View>
+        <Text style = { styles.textM }> PLAZO </Text>
+        <View style={styles.plazo}>
+          <TextInput 
+              placeholder="Ingrese Mes" 
+              style={styles.textInputPlazo}
+              keyboardType="numeric"
+              maxLength={2}    
+          />
+          <Text style={styles.textMeses}> MESES </Text>
+        </View>
+        <View style = { styles.monedas }>
+          <Text style = { styles.text }>$US</Text>
+          <Text style = { styles.text }>BS</Text>
+        </View>
       <Text style = { styles.titlePrecio }>Precio:</Text>
       <View style = { styles.precioContainer }>
         <TextInput 
@@ -154,21 +128,22 @@ const HomeScreem = () => {
           placeholder="PRECIO Bs" 
           style = { styles.preciobs }
           value={precioBolivianos}
-          editable={false}
           keyboardType="numeric"/>
       </View>
       <Text style = { styles.titleInicial }>Incial:</Text>
       <View style = { styles.incialContainer }>
-        <TextInput 
+        <TextInput
           placeholder="PRECIO $US"
           value={inicialDolares}
           onChangeText={handleInicialDolaresChange}   
-          style = { styles.inicialsus }/>
-        <TextInput 
-          placeholder="PRECIO Bs"
+          style = { styles.inicialsus }
+          keyboardType="numeric"/>
+        <TextInput
+          placeholder="PRECIO BS" 
           value={inicialBolivianos}
-          editable={false} 
-          style = { styles.inicialbs }/>
+          onChangeText={handleInicialBolivianosChange}
+          style = { styles.inicialbs }
+          keyboardType="numeric"/>
       </View>
       <TouchableHighlight style = { styles.button } onPress={ handlePress } >
         <Text style = { styles.textButton }> PROCESAR </Text>
@@ -176,8 +151,9 @@ const HomeScreem = () => {
       {showAlert && <Alertproforma onClose={handleClose} />}
       </View>
     </ScrollView>
-  );
-};
+   );
+}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -195,9 +171,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18
   },
-  nrojo: {
+  motosh: {
     height: 200,
-    width: 330,
+    width: 300,
   },
   textInput: {
     borderBottomWidth: 1,
@@ -208,15 +184,32 @@ const styles = StyleSheet.create({
   textM: {
     color: 'grey',
     fontWeight: 'bold',
-    top: 10
+    top: 10,
   },
   select: {
     width: '60%',
+    left: 30
+  },
+  plazo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    left: 30
+  },
+  textInputPlazo: {
+    borderColor: '#ccc',
+    padding: 8,
+    textAlign: "center",
+    borderBottomWidth: 1,
+  },
+  textMeses: {
+    marginLeft: 10,  
+    alignSelf: 'center', 
   },
   monedas: {
     flexDirection: "row",
     gap: 141,
-    left: 8,
+    left: 20,
+    top: 15
   },
   text: {
     color: 'grey',
@@ -225,6 +218,7 @@ const styles = StyleSheet.create({
   precioContainer: {
     flexDirection: "row",
     gap: 70,
+    top: 10
   },
   preciosus: {
     borderBottomWidth: 1,
@@ -241,17 +235,18 @@ const styles = StyleSheet.create({
     color: 'grey',
     fontWeight: 'bold',
     left: -155,
-    top: 23
+    top: 35
   },
   titleInicial: {
     color: 'grey',
     fontWeight: 'bold',
     left: -155,
-    top: 25
+    top: 45
   },
   incialContainer: {
     flexDirection: "row",
     gap: 70,
+    top: 20
   },
   inicialsus: {
     borderBottomWidth: 1,
@@ -265,18 +260,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   button: {
-  backgroundColor: '#cd2027',
-  borderRadius: 20,
-  height: 40,
-  width: 300,
-  marginTop: 20
+    backgroundColor: '#cd2027',
+    borderRadius: 20,
+    height: 40,
+    width: 300,
+    marginTop: 40
   },
   textButton : {
-  color: 'white',
-  paddingTop: 8,
-  paddingLeft: 120 
+    color: 'white',
+    paddingTop: 8,
+    paddingLeft: 120 
   }
-})
-
+  
+});
+ 
 export default HomeScreem;
-*/
