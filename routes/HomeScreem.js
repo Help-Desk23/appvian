@@ -1,8 +1,9 @@
 import axios from "axios";
-import { cloneElement, useEffect, useState } from "react";
-import { ScrollView, Text, View, Image, TextInput, TouchableHighlight} from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, Text, View, Image, TextInput, TouchableHighlight, Alert} from "react-native";
 import { StyleSheet } from "react-native";
 import RNPickerSelect from 'react-native-picker-select';
+import { useRoute } from "@react-navigation/native";
 
 // IMG HONDA
 import Honda from '../assets/hondavi.png';
@@ -12,7 +13,13 @@ import Honda from '../assets/hondavi.png';
 
 
 const HomeScreem = () => {
+  const route = useRoute();
 
+  const { asesor, id_asesores, id_sucursal } = route.params;
+
+  const [nombreCliente, setNombreCliente] = useState('');
+  const [telefonoCliente, setTelefonoCliente] = useState('');
+  const [plazo, setPlazo] = useState('');
   const [data, setData] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
   const [precioDolares, setPrecioDolares] = useState('');
@@ -20,9 +27,12 @@ const HomeScreem = () => {
   const [inicialDolares, setInicialDolares] = useState('');
   const [inicialBolivianos, setInicialBolivianos] = useState('');
   const [imagen, setImagen] = useState('');
-  const [showAlert, setShowAlert] = useState(null);
+  const [ costoVarios, setCostoVarios ] = useState({ interes_anual: 0, formulario: 0 });
+  const [showAlert, setShowAlert] = useState(false);
 
   const tipoCambio = 6.97;
+
+  // MOTOS
 
   const fetchMoto = async () => {
     try{
@@ -32,10 +42,6 @@ const HomeScreem = () => {
       console.error("Error al obtener los datos", error);
     }
   };
-
-  useEffect(() => {
-    fetchMoto();
-  },[]);
 
   const handleModeloChange = (value) => {
     setSelectedValue(value);
@@ -71,19 +77,67 @@ const HomeScreem = () => {
   };
 
 
-  // POST CLIENTES
+  // POST CLIENTE
 
-
-
-
-  const handlePress = () => {
-    setShowAlert(true);
+  const handlePress = async () => {
+    try {
+      const response = await axios.post("http://192.168.2.246:3000/cliente", {
+        nombre: nombreCliente,
+        telefono: telefonoCliente,
+        plazo: parseInt(plazo),
+        precious: precioDolares,
+        inicialbs: inicialBolivianos,
+        cuota_mes: calcularCuotaMensual(),
+        id_motos: selectedValue,
+        id_asesores: id_asesores,
+        id_sucursal: id_sucursal,
+      });
+      setShowAlert(true);
+      Alert.alert("Éxito", "Datos almacenados correctamente");
+    } catch (error) {
+      console.error("Error al procesar la proforma", error);
+      Alert.alert("Error", "No se pudieron almacenar los datos");
+    }
   };
 
-  const handleClose = () => {
-    setShowAlert(false);
-  };
-  
+// GET CUOTA FIJA
+
+const fetchCostoVarios = async () => {
+  try {
+    const response = await axios.get('http://192.168.2.246:3000/costo');
+
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      setCostoVarios(response.data[0]); 
+    } else {
+      console.error("Datos no esperados de la API");
+    }
+  } catch (error) {
+    console.error("Error en la consulta", error);
+  }
+};
+
+useEffect(() => {
+  fetchMoto();
+  fetchCostoVarios();
+},[]);
+
+
+  // CUOTA MENSUAL
+
+  const calcularCuotaMensual = () => {
+    const costoMoto = precioDolares
+    const inicialBs = inicialBolivianos / tipoCambio
+    const interesAnual = costoVarios.interes_anual / 12
+    const costoFormulario = costoVarios.formulario / tipoCambio
+    const plazoMes = plazo
+
+    const montoFinanciando = costoMoto - inicialBs
+    const factorInteres = Math.pow(1 + interesAnual, plazoMes)
+    const cuotaMensual = (montoFinanciando * interesAnual * factorInteres) / ( factorInteres - 1)
+    const cuotaTotal = cuotaMensual + costoFormulario
+
+    return cuotaTotal.toFixed(2);
+  }
 
 
   return ( 
@@ -92,8 +146,8 @@ const HomeScreem = () => {
         <Image source = { Honda } style = { styles.icon }/>
         <Text style = { styles.proforma }>PROFORMA</Text>
         <Image source={imagen ? { uri: imagen } : require('../assets/Navi/navi.png')} style={ styles.motosh} />
-        <TextInput placeholder= "NOMBRE DEL CLIENTE"  style = { styles.textInput }/>
-        <TextInput placeholder= "TELEFONO DEL CLIENTE" style = { styles.textInput } keyboardType="numeric" />
+        <TextInput placeholder= "NOMBRE DEL CLIENTE"  style = { styles.textInput } value={nombreCliente} onChangeText={setNombreCliente} />
+        <TextInput placeholder= "TELEFONO DEL CLIENTE" style = { styles.textInput } keyboardType="numeric" value={telefonoCliente} onChangeText={setTelefonoCliente} />
         <Text style = { styles.textM }> MODELO </Text>
         <View style = { styles.select }>
           <RNPickerSelect
@@ -109,7 +163,9 @@ const HomeScreem = () => {
               placeholder="Ingrese Mes" 
               style={styles.textInputPlazo}
               keyboardType="numeric"
-              maxLength={2}    
+              maxLength={2}
+              value={plazo}
+              onChangeText={setPlazo}    
           />
           <Text style={styles.textMeses}> MESES </Text>
         </View>
@@ -148,7 +204,6 @@ const HomeScreem = () => {
       <TouchableHighlight style = { styles.button } onPress={ handlePress } >
         <Text style = { styles.textButton }> PROCESAR </Text>
       </TouchableHighlight>
-      {showAlert && <Alertproforma onClose={handleClose} />}
       </View>
     </ScrollView>
    );

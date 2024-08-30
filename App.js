@@ -24,6 +24,7 @@ function LoginScreem (){
 
   const [usuario, setUsername] = React.useState('');
   const [contraseña, setPassword] = React.useState('');
+  const [infoAsesores, setInfoAsesores] = React.useState('');
 
   const navigation = useNavigation();
 
@@ -36,8 +37,10 @@ function LoginScreem (){
     })
     .then(response => {
       if(response.data){
-        navigation.navigate('Home')
-        Alert.alert(`Bienvenido ${usuario}`);
+        const { nombre, id_asesores, id_sucursal } = response.data.asesor;
+        setInfoAsesores(nombre)
+        navigation.navigate('Home', { asesor: nombre, id_asesores, id_sucursal });
+        Alert.alert(`Bienvenido ${response.data.asesor.nombre}`);
       } else{
         Alert.alert('Credencial Incorrecta')
       }
