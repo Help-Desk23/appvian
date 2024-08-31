@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View, Image, TextInput, TouchableHighlight, Alert} from "react-native";
+import { ScrollView, Text, View, Image, TextInput, TouchableHighlight, Alert, Modal} from "react-native";
 import { StyleSheet } from "react-native";
 import RNPickerSelect from 'react-native-picker-select';
 import { useRoute } from "@react-navigation/native";
+import Proforma from "../components/proforma";
 
 // IMG HONDA
 import Honda from '../assets/hondavi.png';
@@ -29,6 +30,7 @@ const HomeScreem = () => {
   const [imagen, setImagen] = useState('');
   const [ costoVarios, setCostoVarios ] = useState({ interes_anual: 0, formulario: 0 });
   const [showAlert, setShowAlert] = useState(false);
+  const [ modalVisible, setModalVisible] = useState(false);
 
   const tipoCambio = 6.97;
 
@@ -93,7 +95,7 @@ const HomeScreem = () => {
         id_sucursal: id_sucursal,
       });
       setShowAlert(true);
-      Alert.alert("Éxito", "Datos almacenados correctamente");
+      setModalVisible(true);
     } catch (error) {
       console.error("Error al procesar la proforma", error);
       Alert.alert("Error", "No se pudieron almacenar los datos");
@@ -204,6 +206,29 @@ useEffect(() => {
       <TouchableHighlight style = { styles.button } onPress={ handlePress } >
         <Text style = { styles.textButton }> PROCESAR </Text>
       </TouchableHighlight>
+      <Modal 
+        animationType="slide" 
+        transparent= {false} 
+        visible= {modalVisible} 
+        onRequestClose={() => {
+        setModalVisible(false);
+        }}>
+            <Proforma 
+              nombre={nombreCliente}
+              telefono={telefonoCliente}
+              modelo={selectedValue}
+              plazo={plazo}
+              precioDolares={precioDolares}
+              precioBolivianos={precioBolivianos}
+              inicialDolares={inicialDolares}
+              inicialBolivianos={inicialBolivianos}
+              cuotaMes={calcularCuotaMensual()}
+              asesor={asesor}
+              id_asesores={id_asesores}
+              id_sucursal={id_sucursal}
+              imagen={imagen} 
+            />
+      </Modal>
       </View>
     </ScrollView>
    );
@@ -325,8 +350,7 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingTop: 8,
     paddingLeft: 120 
-  }
-  
+  },
 });
  
 export default HomeScreem;
