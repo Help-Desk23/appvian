@@ -1,19 +1,27 @@
-import { StatusBar } from "expo-status-bar";
 import { Text, View, StyleSheet, Image } from "react-native";
 
 import FondoProforma from '../assets/fondo/fondo.png';
+import { StatusBar } from "expo-status-bar";
 
 const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivianos, inicialDolares, inicialBolivianos, cuotaMes, asesor, id_asesores, id_sucursal, imagen}) => {
     return (
         <View style= {styles.container}>
             <Image source={FondoProforma} style = {[styles.image, StyleSheet.absoluteFill]} />
-            <View style= {styles.imageContainer}>
-              <Image source={{ uri: imagen}} style= {styles.imageMoto} resizeMode="contain" />
+            <Image source={{ uri: imagen}} style= {styles.imageMoto} resizeMode="contain" />
+            <Text style= {styles.modelo}>{modelo}</Text>
+            <View style= {styles.nombreCliente}>
+              <Text style= {styles.tituloCliente}>Cliente:</Text>
+              <Text style= {styles.cliente}> {nombre} </Text>
             </View>
-            <View style= {styles.infoCliente}>
-              <Text>{modelo}</Text>
+            <View style= {styles.precioMoto}>
+              <Text style= {styles.tituloMoto}> Precio Contado: </Text>
+              <View style= {styles.precioContainer}>
+                <Text style= {styles.costoMoto}> $us. {precioDolares} </Text>
+                <Text style= {styles.costoMoto}> Bs. {precioBolivianos} </Text>
+              </View>
             </View>
-            <StatusBar style="auto" />
+            <View style= {styles.linea}></View>
+            <StatusBar barStyles= "light-content" backgroundColor="#202020"/>
         </View> 
      );
 }
@@ -24,19 +32,58 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
+      backgroundColor: "#202020"
     },
     image: { 
       width: "100%",
-      height: "50%",
+      height: "52%",
     },
     imageMoto: {
       width: 350,
       height: 250,
-      top: -150
+      top: -70
+    },
+    modelo: {
+      fontSize: 25,
+      top: -30,
+      fontWeight: "bold",
+      color: "white"
+    },
+    nombreCliente:{
+      alignItems: "center",
+      top: -20
+    },
+    tituloCliente: {
+      color: "red",
+      fontSize: 20,
+      fontWeight: "600"
+    },
+    cliente: {
+      fontSize: 18,
+      color: "white"
+    },
+    precioMoto: {
+      alignItems: "center",
+      top: -5
+    },
+    tituloMoto: {
+      color: "red",
+      fontSize: 20,
+      fontWeight: "600"
+    },
+    precioContainer: {
+      flexDirection: "row",
+      gap: 20
+    },
+    costoMoto: {
+      fontSize: 18,
+      color: "white"
+    },
+    linea: {
+      backgroundColor: "black",
+      height: 2,
+      width: "100%",
+      top: 10
     }
   });
 
