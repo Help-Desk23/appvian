@@ -7,8 +7,13 @@ const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivi
     return (
         <View style= {styles.container}>
             <Image source={FondoProforma} style = {[styles.image, StyleSheet.absoluteFill]} />
-            <Image source={{ uri: imagen}} style= {styles.imageMoto} />
-            <StatusBar style="light" />
+            <View style= {styles.imageContainer}>
+              <Image source={{ uri: imagen}} style= {styles.imageMoto} resizeMode="contain" />
+            </View>
+            <View style= {styles.infoCliente}>
+              <Text>{modelo}</Text>
+            </View>
+            <StatusBar style="auto" />
         </View> 
      );
 }
@@ -16,7 +21,9 @@ const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivi
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
     },
     title: {
       fontSize: 20,
@@ -25,11 +32,11 @@ const styles = StyleSheet.create({
     image: { 
       width: "100%",
       height: "50%",
-      resizeMode: "cover"
     },
     imageMoto: {
-        width: 100,
-        height: 100,
+      width: 350,
+      height: 250,
+      top: -150
     }
   });
 

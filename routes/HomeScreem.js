@@ -31,6 +31,7 @@ const HomeScreem = () => {
   const [ costoVarios, setCostoVarios ] = useState({ interes_anual: 0, formulario: 0 });
   const [showAlert, setShowAlert] = useState(false);
   const [ modalVisible, setModalVisible] = useState(false);
+  const [modeloSeleccionado, setModeloSeleccionado] = useState('');
 
   const tipoCambio = 6.97;
 
@@ -52,10 +53,12 @@ const HomeScreem = () => {
       setImagen(motoSeleccionada.img_motos);
       setPrecioDolares(motoSeleccionada.precious);
       setPrecioBolivianos((motoSeleccionada.precious * tipoCambio).toFixed(2));
+      setModeloSeleccionado(motoSeleccionada.modelo);
     } else {
       setPrecioDolares('');
       setPrecioBolivianos('');
       setImagen('');
+      setModeloSeleccionado('');
     }
   };
 
@@ -216,7 +219,7 @@ useEffect(() => {
             <Proforma 
               nombre={nombreCliente}
               telefono={telefonoCliente}
-              modelo={selectedValue}
+              modelo={modeloSeleccionado}
               plazo={plazo}
               precioDolares={precioDolares}
               precioBolivianos={precioBolivianos}
