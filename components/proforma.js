@@ -1,11 +1,72 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Text, View, StyleSheet, Image, TouchableHighlight, SafeAreaView, Share } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import ViewShot from "react-native-view-shot";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+// Imagenes
 
 import FondoProforma from '../assets/fondo/fondo.png';
-import { StatusBar } from "expo-status-bar";
+import Compartir from '../assets/enviar.png';
+import Descargar from '../assets/descargar.png';
+import { useRef } from "react";
 
-const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivianos, inicialDolares, inicialBolivianos, cuotaMes, asesor, id_asesores, id_sucursal, imagen}) => {
+const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inicialDolares, inicialBolivianos, cuotaMes, asesor, imagen, tipoCambio}) => {
+
+  const viewShotRef = useRef();
+  
+  const financiadoDolar = precioDolares - inicialDolares;
+
+  const financiadoBs = financiadoDolar * tipoCambio;
+
+  const decimalFinanciado = financiadoBs.toFixed(2);
+
+  const cuotaBs = cuotaMes * tipoCambio;
+
+  const decimalCuotaMes = cuotaBs.toFixed(2);
+
+  // Compartir
+
+  const customShare = async () => {
+    const shareOption = {
+      message: "Esto es un Test Mensaje"
+    }
+
+    try{
+      const shareResponse = await Share.share(shareOption)
+    }catch(error){
+      console.log("Error", error);
+    }
+  }
+
+  // Descargar
+
+  const captureAndSave = async () => {
+    try {
+      const uri = await viewShotRef.current.capture();
+      console.log("Imagen guardada en:", uri);
+
+      const fileUri = `${FileSystem.documentDirectory}proforma.png`;
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+      console.log('Imagen movida a:', fileUri);
+
+      const permission = await MediaLibrary.requestPermissionsAsync();
+      if (permission.granted) {
+        await MediaLibrary.saveToLibraryAsync(fileUri);
+        console.log('Imagen guardada en la galería');
+      } else {
+        console.log('Permiso para acceder a la galería denegado');
+      }
+    } catch (error) {
+      console.error('Error al capturar o guardar la imagen:', error);
+    }
+  };
+
     return (
         <View style= {styles.container}>
+          <ViewShot ref={viewShotRef} options={{format: 'png', quality: 0.9}} style={styles.viewShotRef}>
             <Image source={FondoProforma} style = {[styles.image, StyleSheet.absoluteFill]} />
             <Image source={{ uri: imagen}} style= {styles.imageMoto} resizeMode="contain" />
             <Text style= {styles.modelo}>{modelo}</Text>
@@ -13,6 +74,7 @@ const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivi
               <Text style= {styles.tituloCliente}>Cliente:</Text>
               <Text style= {styles.cliente}> {nombre} </Text>
             </View>
+
             <View style= {styles.precioMoto}>
               <Text style= {styles.tituloMoto}> Precio Contado: </Text>
               <View style= {styles.precioContainer}>
@@ -20,9 +82,52 @@ const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivi
                 <Text style= {styles.costoMoto}> Bs. {precioBolivianos} </Text>
               </View>
             </View>
+
             <View style= {styles.linea}></View>
-            <StatusBar barStyles= "light-content" backgroundColor="#202020"/>
-        </View> 
+
+            <View style= {styles.containerTitulos}>
+              <View style= {styles.gapStyles}>
+                <Text style= {styles.titulo}> Cuota Inicial: </Text>
+
+                <Text style= {styles.titulo}> Credito: </Text>
+
+                <Text style= {styles.titulo}> Cuota Mensual: </Text>
+
+                <Text style= {styles.titulo}> Plazo: </Text>
+
+                <Text style= {styles.titulo}> Asesor: </Text>
+              </View>
+              <View style={styles.cuotaContainer}>
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {inicialDolares}</Text>
+                  <Text style= {styles.textStyle}> Bs. {inicialBolivianos}</Text>
+                </View>
+
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {financiadoDolar}</Text>
+                  <Text style= {styles.textStyle}> Bs. {decimalFinanciado}</Text>
+                </View>
+
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {cuotaMes}</Text>
+                  <Text style= {styles.textStyle}> Bs. {decimalCuotaMes}</Text>
+                </View>
+
+                  <Text style= {styles.textStyle}> {plazo} Meses </Text>
+                  <Text style= {styles.textStyle}> {asesor}</Text> 
+              </View>
+            </View>
+          </ViewShot>
+          <View style={styles.iconFooter}>
+            <TouchableHighlight onPress={customShare}>
+              <Image source={Compartir} style={styles.enviar}/>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={captureAndSave}>
+              <Image source={Descargar} style={styles.enviar}/>
+            </TouchableHighlight>
+          </View>
+          <StatusBar barStyles= "light-content" backgroundColor="#202020"/>
+        </View>
      );
 }
 
@@ -30,9 +135,12 @@ const Proforma = ({ nombre, telefono, modelo, plazo, precioDolares, precioBolivi
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
       backgroundColor: "#202020"
+    },
+    viewShotRef: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center"
     },
     image: { 
       width: "100%",
@@ -41,17 +149,16 @@ const styles = StyleSheet.create({
     imageMoto: {
       width: 350,
       height: 250,
-      top: -70
     },
     modelo: {
       fontSize: 25,
-      top: -30,
       fontWeight: "bold",
-      color: "white"
+      color: "white",
+      top: 35
     },
     nombreCliente:{
       alignItems: "center",
-      top: -20
+      top: 45
     },
     tituloCliente: {
       color: "red",
@@ -64,7 +171,7 @@ const styles = StyleSheet.create({
     },
     precioMoto: {
       alignItems: "center",
-      top: -5
+      top: 55
     },
     tituloMoto: {
       color: "red",
@@ -81,9 +188,44 @@ const styles = StyleSheet.create({
     },
     linea: {
       backgroundColor: "black",
-      height: 2,
+      height: 1,
       width: "100%",
-      top: 10
+      top: 70
+    },
+    containerTitulos: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      top: 75
+    },
+    gapStyles: {
+      gap: 5
+    },
+    titulo: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "red"
+    },
+    cuotaContainer: {
+      gap: 8
+    },
+    direction:{
+      flexDirection: "row",
+      gap: 20
+    },
+    textStyle: {
+      fontSize: 15,
+      color: "white"
+    },
+    iconFooter: {
+      flexDirection: "row",
+      justifyContent: "center",
+      top: -15,
+      gap: 30
+    },
+    enviar: {
+      height: 40,
+      width: 40
     }
   });
 
@@ -91,20 +233,70 @@ const styles = StyleSheet.create({
 export default Proforma;
 
 
+
 /*
-        <View style={styles.container}>
-            <Text style={styles.title}>Proforma</Text>
-            <Image source={{ uri: imagen }} style={styles.image} />
-            <Text>Cliente: {nombre}</Text>
-            <Text>Teléfono: {telefono}</Text>
-            <Text>Modelo: {modelo}</Text>
-            <Text>Plazo: {plazo} meses</Text>
-            <Text>Precio: {precioDolares} $US / {precioBolivianos} Bs</Text>
-            <Text>Inicial: {inicialDolares} $US / {inicialBolivianos} Bs</Text>
-            <Text>Cuota Mensual: {cuotaMes} $US</Text>
-            <Text>Asesor: {asesor}</Text>
-            <Text>ID Asesor: {id_asesores}</Text>
-            <Text>ID Sucursal: {id_sucursal}</Text>
-        <StatusBar style="auto" />
+<View style= {styles.container}>
+          <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
+            <Image source={FondoProforma} style = {[styles.image, StyleSheet.absoluteFill]} />
+            <Image source={{ uri: imagen}} style= {styles.imageMoto} resizeMode="contain" />
+            <Text style= {styles.modelo}>{modelo}</Text>
+            <View style= {styles.nombreCliente}>
+              <Text style= {styles.tituloCliente}>Cliente:</Text>
+              <Text style= {styles.cliente}> {nombre} </Text>
+            </View>
+
+            <View style= {styles.precioMoto}>
+              <Text style= {styles.tituloMoto}> Precio Contado: </Text>
+              <View style= {styles.precioContainer}>
+                <Text style= {styles.costoMoto}> $us. {precioDolares} </Text>
+                <Text style= {styles.costoMoto}> Bs. {precioBolivianos} </Text>
+              </View>
+            </View>
+
+            <View style= {styles.linea}></View>
+
+            <View style= {styles.containerTitulos}>
+              <View style= {styles.gapStyles}>
+                <Text style= {styles.titulo}> Cuota Inicial: </Text>
+
+                <Text style= {styles.titulo}> Credito: </Text>
+
+                <Text style= {styles.titulo}> Cuota Mensual: </Text>
+
+                <Text style= {styles.titulo}> Plazo: </Text>
+
+                <Text style= {styles.titulo}> Asesor: </Text>
+              </View>
+
+              <View style={styles.cuotaContainer}>
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {inicialDolares}</Text>
+                  <Text style= {styles.textStyle}> Bs. {inicialBolivianos}</Text>
+                </View>
+
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {financiadoDolar}</Text>
+                  <Text style= {styles.textStyle}> Bs. {decimalFinanciado}</Text>
+                </View>
+
+                <View style= {styles.direction}>
+                  <Text style= {styles.textStyle}> $us. {cuotaMes}</Text>
+                  <Text style= {styles.textStyle}> Bs. {decimalCuotaMes}</Text>
+                </View>
+
+                  <Text style= {styles.textStyle}> {plazo} Meses </Text>
+                  <Text style= {styles.textStyle}> {asesor}</Text> 
+                </View>
+              </View>
+          </ViewShot>
+              <View style={styles.iconFooter}>
+                <TouchableHighlight onPress={customShare}> 
+                  <Image source={Compartir} style={styles.enviar}/>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={captureAndSave}> 
+                  <Image source={Descargar} style={styles.enviar}/>
+                </TouchableHighlight>
+              </View>
+            <StatusBar barStyles= "light-content" backgroundColor="#202020"/>
         </View>
 */

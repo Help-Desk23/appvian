@@ -229,7 +229,8 @@ useEffect(() => {
               asesor={asesor}
               id_asesores={id_asesores}
               id_sucursal={id_sucursal}
-              imagen={imagen} 
+              imagen={imagen}
+              tipoCambio={tipoCambio}
             />
       </Modal>
       </View>
