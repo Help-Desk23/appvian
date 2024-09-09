@@ -1,14 +1,15 @@
-import { Text, View, StyleSheet, Image, TouchableHighlight, SafeAreaView, Share } from "react-native";
+import { Text, View, StyleSheet, Image, TouchableHighlight, SafeAreaView, Share, Alert } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import * as Sharing from 'expo-sharing';
 // Imagenes
 
 import FondoProforma from '../assets/fondo/fondo.png';
 import Compartir from '../assets/enviar.png';
 import Descargar from '../assets/descargar.png';
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inicialDolares, inicialBolivianos, cuotaMes, asesor, imagen, tipoCambio}) => {
 
@@ -23,20 +24,6 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
   const cuotaBs = cuotaMes * tipoCambio;
 
   const decimalCuotaMes = cuotaBs.toFixed(2);
-
-  // Compartir
-
-  const customShare = async () => {
-    const shareOption = {
-      message: "Esto es un Test Mensaje"
-    }
-
-    try{
-      const shareResponse = await Share.share(shareOption)
-    }catch(error){
-      console.log("Error", error);
-    }
-  }
 
   // Descargar
 
@@ -55,7 +42,7 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
       const permission = await MediaLibrary.requestPermissionsAsync();
       if (permission.granted) {
         await MediaLibrary.saveToLibraryAsync(fileUri);
-        console.log('Imagen guardada en la galería');
+        Alert.alert('Imagen guardada en la galería');
       } else {
         console.log('Permiso para acceder a la galería denegado');
       }
@@ -63,6 +50,30 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
       console.error('Error al capturar o guardar la imagen:', error);
     }
   };
+
+    // Compartir
+    const shareImage = async () => {
+      try {
+        const uri = await viewShotRef.current.capture();
+        console.log('URI capturada:', uri);
+        const fileUri = `${FileSystem.documentDirectory}proforma.png`;
+        await FileSystem.moveAsync({
+          from: uri,
+          to: fileUri,
+        });
+        console.log('Imagen movida a:', fileUri);
+    
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri, {
+            dialogTitle: 'Compartir Proforma',
+          });
+        } else {
+          console.log('El sistema no permite compartir esta imagen');
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
     return (
         <View style= {styles.container}>
@@ -119,7 +130,7 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
             </View>
           </ViewShot>
           <View style={styles.iconFooter}>
-            <TouchableHighlight onPress={customShare}>
+            <TouchableHighlight onPress={shareImage}>
               <Image source={Compartir} style={styles.enviar}/>
             </TouchableHighlight>
             <TouchableHighlight onPress={captureAndSave}>
