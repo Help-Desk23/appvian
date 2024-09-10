@@ -51,28 +51,28 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
     }
   };
 
-    // Compartir
-    const shareImage = async () => {
-      try {
-        const uri = await viewShotRef.current.capture();
-        console.log('URI capturada:', uri);
-        const fileUri = `${FileSystem.documentDirectory}proforma.png`;
-        await FileSystem.moveAsync({
-          from: uri,
-          to: fileUri,
+  // Compartir
+  
+  const shareImage = async () => {
+    try {
+      const uri = await viewShotRef.current.capture();
+      console.log('URI capturada:', uri);
+      const fileUri = `${FileSystem.documentDirectory}proforma.png`;
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+      console.log('Imagen movida a:', fileUri);
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          dialogTitle: 'Compartir Proforma',
         });
-        console.log('Imagen movida a:', fileUri);
-    
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(fileUri, {
-            dialogTitle: 'Compartir Proforma',
-          });
-        } else {
-          console.log('El sistema no permite compartir esta imagen');
-        }
-      } catch (error) {
-        console.log(error);
+      } else {
+        console.log('El sistema no permite compartir esta imagen');
       }
+    } catch (error) {
+      console.log(error);
+    }
     };
 
     return (

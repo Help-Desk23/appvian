@@ -13,7 +13,9 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
 import HomeScreem from './routes/HomeScreem';
-import SettingScreem from './routes/SettingScreem';
+import SearchingScreem from './routes/SearchingScreem';
+import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 
 
@@ -90,13 +92,35 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator screenOptions={{
+        tabBarActiveTintColor: "#cd2027"
+      }}>
         <Tab.Screen 
           name='Login' 
           component={LoginScreem} 
           options={{ headerShown: false, tabBarButton: () => null, tabBarLabel: () => null, tabBarStyle: { display: 'none'} }} />
-        <Tab.Screen name='Home' component={HomeScreem} options={{ headerShown: false }}/>
-        <Tab.Screen name='Setting' component={SettingScreem} options={{ headerShown: false}} />
+        <Tab.Screen 
+          name='Home' 
+          component={HomeScreem} 
+          options={{ 
+            headerShown: false,
+            tabBarLabel: "Inicio",
+            tabBarIcon: ({color, size}) => (
+              <Entypo name="home" size={size} color={color} />
+            )
+          }}
+          />
+        <Tab.Screen 
+          name='Searching' 
+          component={SearchingScreem} 
+          options={{ 
+            headerShown: false,
+            tabBarLabel: "Buscar",
+            tabBarIcon: ({color, size}) => (
+              <FontAwesome name="search" size={size} color={color} />
+            )
+          }}
+          />
       </Tab.Navigator>
     </NavigationContainer>
   );
