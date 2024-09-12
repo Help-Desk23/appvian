@@ -12,12 +12,9 @@ const SettingScreem = () => {
   const [sucursales, setSucursales] = useState([]); 
 
   useEffect(() => {
-    const interval = setInterval(() => {
       fetchData('http://192.168.2.246:3000/cliente');
       fetchMotos('http://192.168.2.246:3000/motos'); 
       fetchSucursales('http://192.168.2.246:3000/sucursal');
-    }, 5000); 
-    return () => clearInterval(interval);
   }, []);
 
   
@@ -34,7 +31,7 @@ const SettingScreem = () => {
     }
   }
 
-// FECH PARA MOTOS
+// FETCH PARA MOTOS
 
   const fetchMotos = async (url) => {
     try {
@@ -46,7 +43,7 @@ const SettingScreem = () => {
     }
   };
 
-// FECH PARA SUCURSALES
+// FETCH PARA SUCURSALES
 
   const fetchSucursales = async (url) => {
     try {
@@ -90,12 +87,12 @@ const SettingScreem = () => {
 
     const formatFecha = (fecha) => {
       const date = new Date(fecha);
-      return date.toLocaleDateString(); // Esto mostrará la fecha en formato local
+      return date.toLocaleDateString();
     };
 
 
   return(
-    <ScrollView contentContainerStyle ={{ flex: 1}}>
+    <ScrollView>
       <View style= {styles.container}>
         <View style= {styles.containerProforma}>
           <Text style={styles.titleProforma }> BUSCAR PROFORMA </Text>
@@ -144,7 +141,6 @@ const SettingScreem = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: "center",
   },
   containerProforma: {
@@ -153,9 +149,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    position: 'absolute',
-    top: 0,
-    right: 0,
     zIndex: 1,
   },
   titleProforma: {
@@ -167,7 +160,7 @@ const styles = StyleSheet.create({
   containerBuscar: {
     flexDirection: "row",
     gap: 50,
-    marginTop: 100,
+    marginTop: 10,
   },
   iconSearch: {
     height: 40,
