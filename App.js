@@ -104,9 +104,9 @@ export default function App() {
           component={HomeScreem} 
           options={{ 
             headerShown: false,
-            tabBarLabel: "Inicio",
+            tabBarLabel: "Calcular",
             tabBarIcon: ({color, size}) => (
-              <Entypo name="home" size={size} color={color} />
+              <Entypo name="calculator" size={size} color={color} />
             )
           }}
           />
