@@ -22,7 +22,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 function LoginScreem (){
 
-  const url = 'http://192.168.2.246:3000/login';
+  const url = 'http://192.168.2.2:3000/login';
 
   const [usuario, setUsername] = React.useState('');
   const [contraseña, setPassword] = React.useState('');

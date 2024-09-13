@@ -12,9 +12,9 @@ const SettingScreem = () => {
   const [sucursales, setSucursales] = useState([]); 
 
   useEffect(() => {
-      fetchData('http://192.168.2.246:3000/cliente');
-      fetchMotos('http://192.168.2.246:3000/motos'); 
-      fetchSucursales('http://192.168.2.246:3000/sucursal');
+      fetchData('http://192.168.2.2:3000/cliente');
+      fetchMotos('http://192.168.2.2:3000/motos'); 
+      fetchSucursales('http://192.168.2.2:3000/sucursal');
   }, []);
 
   
@@ -135,7 +135,7 @@ const SettingScreem = () => {
           })}
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
   );
 }
 
@@ -149,7 +149,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 1,
   },
   titleProforma: {
     fontSize: 15,

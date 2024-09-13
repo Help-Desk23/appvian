@@ -39,7 +39,7 @@ const HomeScreem = () => {
 
   const fetchMoto = async () => {
     try{
-      const response = await axios.get("http://192.168.2.246:3000/motos");
+      const response = await axios.get("http://192.168.2.2:3000/motos");
       setData(response.data);
     } catch(error) {
       console.error("Error al obtener los datos", error);
@@ -86,7 +86,7 @@ const HomeScreem = () => {
 
   const handlePress = async () => {
     try {
-      const response = await axios.post("http://192.168.2.246:3000/cliente", {
+      const response = await axios.post("http://192.168.2.2:3000/cliente", {
         nombre: nombreCliente,
         telefono: telefonoCliente,
         plazo: parseInt(plazo),
@@ -109,7 +109,7 @@ const HomeScreem = () => {
 
 const fetchCostoVarios = async () => {
   try {
-    const response = await axios.get('http://192.168.2.246:3000/costo');
+    const response = await axios.get('http://192.168.2.2:3000/costo');
 
     if (Array.isArray(response.data) && response.data.length > 0) {
       setCostoVarios(response.data[0]); 
