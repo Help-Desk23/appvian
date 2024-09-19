@@ -17,10 +17,6 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
   
   const financiadoDolar = precioDolares - inicialDolares;
 
-  const financiadoBs = financiadoDolar * tipoCambio;
-
-  const decimalFinanciado = financiadoBs.toFixed(2);
-
   const cuotaBs = cuotaMes * tipoCambio;
 
   const decimalCuotaMes = cuotaBs.toFixed(2);
@@ -100,8 +96,6 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
               <View style= {styles.gapStyles}>
                 <Text style= {styles.titulo}> Cuota Inicial: </Text>
 
-                <Text style= {styles.titulo}> Credito: </Text>
-
                 <Text style= {styles.titulo}> Cuota Mensual: </Text>
 
                 <Text style= {styles.titulo}> Plazo: </Text>
@@ -112,11 +106,6 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
                 <View style= {styles.direction}>
                   <Text style= {styles.textStyle}> $us. {inicialDolares}</Text>
                   <Text style= {styles.textStyle}> Bs. {inicialBolivianos}</Text>
-                </View>
-
-                <View style= {styles.direction}>
-                  <Text style= {styles.textStyle}> $us. {financiadoDolar}</Text>
-                  <Text style= {styles.textStyle}> Bs. {decimalFinanciado}</Text>
                 </View>
 
                 <View style= {styles.direction}>

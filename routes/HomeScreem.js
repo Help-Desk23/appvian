@@ -39,7 +39,7 @@ const HomeScreem = () => {
 
   const fetchMoto = async () => {
     try{
-      const response = await axios.get("http://192.168.2.2:3000/motos");
+      const response = await axios.get("http://192.168.2.8:3000/motos");
       setData(response.data);
     } catch(error) {
       console.error("Error al obtener los datos", error);
@@ -54,6 +54,7 @@ const HomeScreem = () => {
       setPrecioDolares(motoSeleccionada.precious);
       setPrecioBolivianos((motoSeleccionada.precious * tipoCambio).toFixed(2));
       setModeloSeleccionado(motoSeleccionada.modelo);
+      setInicialBolivianos(motoSeleccionada.inicialbs);
     } else {
       setPrecioDolares('');
       setPrecioBolivianos('');
@@ -86,7 +87,7 @@ const HomeScreem = () => {
 
   const handlePress = async () => {
     try {
-      const response = await axios.post("http://192.168.2.2:3000/cliente", {
+      const response = await axios.post("http://192.168.2.8:3000/cliente", {
         nombre: nombreCliente,
         telefono: telefonoCliente,
         plazo: parseInt(plazo),
@@ -109,7 +110,7 @@ const HomeScreem = () => {
 
 const fetchCostoVarios = async () => {
   try {
-    const response = await axios.get('http://192.168.2.2:3000/costo');
+    const response = await axios.get('http://192.168.2.8:3000/costo');
 
     if (Array.isArray(response.data) && response.data.length > 0) {
       setCostoVarios(response.data[0]); 
@@ -131,7 +132,8 @@ useEffect(() => {
 
   const calcularCuotaMensual = () => {
     const costoMoto = precioDolares
-    const inicialBs = inicialBolivianos / tipoCambio
+    const descuentoIncial = 700
+    const inicialBs = (inicialBolivianos - descuentoIncial) / tipoCambio
     const interesAnual = costoVarios.interes_anual / 12
     const costoFormulario = costoVarios.formulario / tipoCambio
     const plazoMes = plazo

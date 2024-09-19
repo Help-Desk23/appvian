@@ -16,17 +16,19 @@ import HomeScreem from './routes/HomeScreem';
 import SearchingScreem from './routes/SearchingScreem';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Loading from './components/loading';
 
 
 
 
 function LoginScreem (){
 
-  const url = 'http://192.168.2.2:3000/login';
+  const url = 'http://192.168.2.8:3000/login';
 
   const [usuario, setUsername] = React.useState('');
   const [contraseña, setPassword] = React.useState('');
   const [infoAsesores, setInfoAsesores] = React.useState('');
+  const [loading, setLoading] =React.useState(true);
 
   const navigation = useNavigation();
 
@@ -52,6 +54,14 @@ function LoginScreem (){
       console.error(error)
       Alert.alert('Usuario o Contraseña Incorrecta')
     })
+  }
+
+  const handleLoadingComplete = () => {
+    setLoading(false); 
+  };
+
+  if (loading) {
+    return <Loading onComplete={handleLoadingComplete} />;
   }
 
   return(

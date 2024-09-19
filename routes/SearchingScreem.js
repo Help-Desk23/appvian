@@ -12,9 +12,9 @@ const SettingScreem = () => {
   const [sucursales, setSucursales] = useState([]); 
 
   useEffect(() => {
-      fetchData('http://192.168.2.2:3000/cliente');
-      fetchMotos('http://192.168.2.2:3000/motos'); 
-      fetchSucursales('http://192.168.2.2:3000/sucursal');
+      fetchData('http://192.168.2.8:3000/cliente');
+      fetchMotos('http://192.168.2.8:3000/motos'); 
+      fetchSucursales('http://192.168.2.8:3000/sucursal');
   }, []);
 
   
@@ -58,6 +58,7 @@ const SettingScreem = () => {
 
   const limpiarTexto = () => {
     setCliente('');
+    searchFilterFuction('')
   }
 
   const searchFilterFuction = (text) => {
@@ -92,8 +93,103 @@ const SettingScreem = () => {
 
 
   return(
-    <ScrollView>
-      <View style= {styles.container}>
+    <ScrollView contentContainerStyle= {{ flexGrow: 1}}>
+      <View style= {{ alignItems: "center", flex: 1}}>
+        <View style= {styles.containerProforma}>
+          <Text style={styles.titleProforma }> BUSCAR PROFORMA </Text>
+        </View>
+        <View style={ styles.containerBuscar}>
+          <TextInput 
+            placeholder="NOMBRE DEL CLIENTE" 
+            style= {styles.input} 
+            value={cliente} 
+            onChangeText={(text) => { 
+              setCliente(text); 
+              searchFilterFuction(text)
+              }}
+          />
+            <TouchableHighlight onPress={limpiarTexto}>
+              <Image source={Cancelar} style= {styles.iconSearch} />
+            </TouchableHighlight>
+        </View>
+        <View style= {styles.containerCliente}>
+          {filteredData.map((item, index) => {
+            return(
+              <View key={index} style= {styles.gapClientes}>
+                <View style={styles.clienteContainer}> 
+                  {motos.find(m => m.id_motos === item.id_motos) && (
+                    <Image
+                      source={{ uri: motos.find(m => m.id_motos === item.id_motos).img_motos }}
+                      style={styles.motoImage}
+                      resizeMode= "contain"
+                  />
+                  )}
+                </View>
+                <View style={styles.clienteInfo}>
+                  <Text> {item.nombre}</Text>
+                  <Text> {getMotoNombre(item.id_motos)}</Text>
+                  <Text> {getSucursalNombre(item.id_sucursal)}</Text>
+                  <Text> {formatFecha(item.fecha)} </Text>
+                </View>
+              </View>
+            )
+          })}
+          </View>
+        </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  containerProforma: {
+    backgroundColor: "#cd2027",
+    height: 80,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleProforma: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: "white",
+    top: 20
+  },
+  containerBuscar: {
+    flexDirection: "row",
+    gap: 50,
+    marginTop: 10,
+    justifyContent: "center"
+  },
+  iconSearch: {
+    height: 40,
+    width: 40
+  },
+  input: {
+    borderBottomWidth: 1,
+    width: "70%",
+    textAlign: "center",
+    borderBottomColor: '#ccc',
+  },
+  containerCliente: {
+    gap: 20,
+    top: 40,
+  },
+  gapClientes: {
+    flexDirection: "row",
+  },
+  motoImage: {
+    width: 100,
+    height: 100,
+  },
+  clienteInfo: {
+    justifyContent: 'center',
+  },
+});
+
+export default SettingScreem;
+
+
+/*      <View style= {styles.container}>
         <View style= {styles.containerProforma}>
           <Text style={styles.titleProforma }> BUSCAR PROFORMA </Text>
         </View>
@@ -134,57 +230,4 @@ const SettingScreem = () => {
             )
           })}
         </View>
-      </View>
-      </ScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-  },
-  containerProforma: {
-    backgroundColor: "#cd2027",
-    height: 80,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  titleProforma: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: "white",
-    top: 20
-  },
-  containerBuscar: {
-    flexDirection: "row",
-    gap: 50,
-    marginTop: 10,
-  },
-  iconSearch: {
-    height: 40,
-    width: 40
-  },
-  input: {
-    borderBottomWidth: 1,
-    width: "70%",
-    textAlign: "center",
-    borderBottomColor: '#ccc',
-  },
-  containerCliente: {
-    gap: 20,
-    top: 40
-  },
-  gapClientes: {
-    flexDirection: "row",
-  },
-  motoImage: {
-    width: 100,
-    height: 100,
-  },
-  clienteInfo: {
-    justifyContent: 'center',
-  },
-});
-
-export default SettingScreem;
+      </View> */
