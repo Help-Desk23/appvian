@@ -2,69 +2,46 @@ import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View,TextInput, ScrollView, TouchableHighlight} from "react-native";
 
 import Cancelar from '../assets/cancelar.png';
+import axios from "axios";
 
 const SettingScreem = () => {
 
-  const [cliente, setCliente] = useState('');
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [motos, setMotos] = useState([]);
-  const [sucursales, setSucursales] = useState([]); 
+  const [cliente, setCliente] = useState('');
+
+
+  const fetchCliente = async () => {
+    try {
+      const response = await axios.get('http://192.168.2.8:3000/clientes');
+      setData(response.data); 
+      setFilteredData(response.data);
+      console.log(response.data); 
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-      fetchData('http://192.168.2.8:3000/cliente');
-      fetchMotos('http://192.168.2.8:3000/motos'); 
-      fetchSucursales('http://192.168.2.8:3000/sucursal');
-  }, []);
+    fetchCliente();
+  },[])
 
-  
-// FECH PARA CLIENTES
 
-  const fetchData = async (url) => {
-    try{
-      const response = await fetch(url);
-      const json = await response.json();
-      setData(json);
-      setFilteredData(json);
-    } catch(error){
-      console.log(error)
-    }
-  }
-
-// FETCH PARA MOTOS
-
-  const fetchMotos = async (url) => {
-    try {
-      const response = await fetch(url);
-      const json = await response.json();
-      setMotos(json);
-    } catch (error) {
-      console.log(error);
-    }
+  const formatFecha = (fecha) => {
+    const date = new Date(fecha);
+    return date.toLocaleDateString();
   };
-
-// FETCH PARA SUCURSALES
-
-  const fetchSucursales = async (url) => {
-    try {
-      const response = await fetch(url);
-      const json = await response.json();
-      setSucursales(json);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
 
   const limpiarTexto = () => {
     setCliente('');
     searchFilterFuction('')
   }
 
+
   const searchFilterFuction = (text) => {
     if(text){
       const newData = data.filter(item => {
-        const itemData = item.nombre ? item.nombre.toUpperCase() : ''.toUpperCase();
+        const itemData = item.nombre_cliente ? item.nombre_cliente.toUpperCase() : ''.toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       })
@@ -73,23 +50,6 @@ const SettingScreem = () => {
       setFilteredData(data);
     }
   }
-
-    // Obtener nombre de moto basado en id_motos
-    const getMotoNombre = (id_motos) => {
-      const moto = motos.find(m => m.id_motos === id_motos);
-      return moto ? moto.modelo : 'Moto no encontrada';
-    };
-  
-    // Obtener nombre de sucursal basado en id_sucursal
-    const getSucursalNombre = (id_sucursal) => {
-      const sucursal = sucursales.find(s => s.id_sucursal === id_sucursal);
-      return sucursal ? sucursal.sucursal : 'Sucursal no encontrada';
-    };
-
-    const formatFecha = (fecha) => {
-      const date = new Date(fecha);
-      return date.toLocaleDateString();
-    };
 
 
   return(
@@ -113,28 +73,22 @@ const SettingScreem = () => {
             </TouchableHighlight>
         </View>
         <View style= {styles.containerCliente}>
-          {filteredData.map((item, index) => {
+          {filteredData.map ((item, index) => {
             return(
-              <View key={index} style= {styles.gapClientes}>
-                <View style={styles.clienteContainer}> 
-                  {motos.find(m => m.id_motos === item.id_motos) && (
-                    <Image
-                      source={{ uri: motos.find(m => m.id_motos === item.id_motos).img_motos }}
-                      style={styles.motoImage}
-                      resizeMode= "contain"
-                  />
-                  )}
+              <View style= {styles.gapClientes} key={index}>
+                <View style= {styles.clienteContainer}>
+                  <Image source={{uri: item.img_moto}} style= {styles.motoImage} resizeMode= "contain"/>
                 </View>
                 <View style={styles.clienteInfo}>
-                  <Text> {item.nombre}</Text>
-                  <Text> {getMotoNombre(item.id_motos)}</Text>
-                  <Text> {getSucursalNombre(item.id_sucursal)}</Text>
+                  <Text> {item.nombre_cliente}</Text>
+                  <Text> {item.modelo}</Text>
+                  <Text> {item.sucursal}</Text>
                   <Text> {formatFecha(item.fecha)} </Text>
                 </View>
               </View>
             )
           })}
-          </View>
+        </View>
         </View>
     </ScrollView>
   );
@@ -187,47 +141,3 @@ const styles = StyleSheet.create({
 });
 
 export default SettingScreem;
-
-
-/*      <View style= {styles.container}>
-        <View style= {styles.containerProforma}>
-          <Text style={styles.titleProforma }> BUSCAR PROFORMA </Text>
-        </View>
-        <View style={ styles.containerBuscar}>
-            <TextInput 
-              placeholder="NOMBRE DEL CLIENTE" 
-              style= {styles.input} 
-              value={cliente} 
-              onChangeText={(text) => {
-                setCliente(text);
-                searchFilterFuction(text)
-              }}/>
-            <TouchableHighlight onPress={limpiarTexto}>
-              <Image source={Cancelar} style= {styles.iconSearch} />
-            </TouchableHighlight>
-        </View>
-
-        <View style= {styles.containerCliente}>
-          {filteredData.map((item, index) => {
-            return(
-              <View key={index} style= {styles.gapClientes}>
-                <View style={styles.clienteContainer}> 
-                  {motos.find(m => m.id_motos === item.id_motos) && (
-                    <Image
-                      source={{ uri: motos.find(m => m.id_motos === item.id_motos).img_motos }}
-                      style={styles.motoImage}
-                      resizeMode= "contain"
-                  />
-                  )}
-                </View>
-                <View style={styles.clienteInfo}>
-                  <Text> {item.nombre}</Text>
-                  <Text> {getMotoNombre(item.id_motos)}</Text>
-                  <Text> {getSucursalNombre(item.id_sucursal)}</Text>
-                  <Text> {formatFecha(item.fecha)} </Text>
-                </View>
-              </View>
-            )
-          })}
-        </View>
-      </View> */
