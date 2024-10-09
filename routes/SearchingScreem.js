@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View,TextInput, ScrollView, TouchableHighlight} from "react-native";
+import { Image, StyleSheet, Text, View,TextInput, ScrollView, TouchableHighlight, Alert} from "react-native";
 
 import Cancelar from '../assets/cancelar.png';
 import axios from "axios";
+import { io } from "socket.io-client";
 
 const SettingScreem = () => {
 
@@ -10,22 +11,22 @@ const SettingScreem = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [cliente, setCliente] = useState('');
 
+  
+const socket = io("http://192.168.2.30:4000");
 
-  const fetchCliente = async () => {
-    try {
-      const response = await axios.get('http://192.168.2.8:3000/clientes');
-      setData(response.data); 
-      setFilteredData(response.data);
-      console.log(response.data); 
-    } catch (error) {
-      console.log(error);
-    }
-  };
+useEffect(() =>{
+  socket.on("connect", () => {
+    socket.emit("obtenerCotizacion")
+  });
 
-  useEffect(() => {
-    fetchCliente();
-  },[])
+  socket.on("proformaData", (cotizacion) => {
+    setData(cotizacion)
+  })
+}, []);
 
+useEffect(() => {
+  setFilteredData(data);
+}, [data]);
 
   const formatFecha = (fecha) => {
     const date = new Date(fecha);
@@ -62,13 +63,13 @@ const SettingScreem = () => {
           <TextInput 
             placeholder="NOMBRE DEL CLIENTE" 
             style= {styles.input} 
-            value={cliente} 
+            value={cliente}
             onChangeText={(text) => { 
               setCliente(text); 
               searchFilterFuction(text)
               }}
           />
-            <TouchableHighlight onPress={limpiarTexto}>
+            <TouchableHighlight onPress={limpiarTexto} underlayColor="transparent">
               <Image source={Cancelar} style= {styles.iconSearch} />
             </TouchableHighlight>
         </View>
@@ -79,12 +80,25 @@ const SettingScreem = () => {
                 <View style= {styles.clienteContainer}>
                   <Image source={{uri: item.img_moto}} style= {styles.motoImage} resizeMode= "contain"/>
                 </View>
-                <View style={styles.clienteInfo}>
+                <TouchableHighlight onPress={() => 
+                  Alert.alert("Proforma Cliente", 
+                  `Nombre: ${item.nombre_cliente}
+                  \nModelo: ${item.modelo}
+                  \nSucursal: ${item.sucursal}
+                  \nPrecio: ${item.precious} $us.
+                  \nIncial: ${item.inicialbs} Bs.
+                  \nCuota Mensual: ${item.cuota_mes} $us.
+                  \nPlazo: ${item.plazo} Meses
+                  \nFecha: ${formatFecha(item.fecha)}`)}
+                  underlayColor="transparent"
+                  style={styles.clienteInfo}>
+                <View>
                   <Text> {item.nombre_cliente}</Text>
                   <Text> {item.modelo}</Text>
                   <Text> {item.sucursal}</Text>
                   <Text> {formatFecha(item.fecha)} </Text>
                 </View>
+                </TouchableHighlight>
               </View>
             )
           })}

@@ -5,12 +5,10 @@ import { StyleSheet } from "react-native";
 import RNPickerSelect from 'react-native-picker-select';
 import { useRoute } from "@react-navigation/native";
 import Proforma from "../components/proforma";
+import io from "socket.io-client";
 
 // IMG HONDA
 import Honda from '../assets/hondavi.png';
-
-
-
 
 
 const HomeScreem = () => {
@@ -28,7 +26,7 @@ const HomeScreem = () => {
   const [inicialDolares, setInicialDolares] = useState('');
   const [inicialBolivianos, setInicialBolivianos] = useState('');
   const [imagen, setImagen] = useState('');
-  const [ costoVarios, setCostoVarios ] = useState({ interes_anual: 0, formulario: 0 });
+  const [ costoVarios, setCostoVarios ] = useState([{ interes_anual: 0, formulario: 0 }]);
   const [showAlert, setShowAlert] = useState(false);
   const [ modalVisible, setModalVisible] = useState(false);
   const [modeloSeleccionado, setModeloSeleccionado] = useState('');
@@ -37,14 +35,28 @@ const HomeScreem = () => {
 
   // MOTOS
 
-  const fetchMoto = async () => {
-    try{
-      const response = await axios.get("http://192.168.2.8:3000/motos");
-      setData(response.data);
-    } catch(error) {
-      console.error("Error al obtener los datos", error);
-    }
-  };
+  const socket = io("http://192.168.2.30:4000")
+
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      socket.emit("obtenerMotos");
+      socket.emit("obtenerCostos");
+    });
+  
+    socket.on("motos", (motos) => {
+      setData(motos);
+    });
+  
+    socket.on("costovarios", (costos) => {
+      setCostoVarios(costos);
+    });
+  
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
 
   const handleModeloChange = (value) => {
     setSelectedValue(value);
@@ -54,7 +66,6 @@ const HomeScreem = () => {
       setPrecioDolares(motoSeleccionada.precious);
       setPrecioBolivianos((motoSeleccionada.precious * tipoCambio).toFixed(2));
       setModeloSeleccionado(motoSeleccionada.modelo);
-      setInicialBolivianos(motoSeleccionada.inicialbs);
     } else {
       setPrecioDolares('');
       setPrecioBolivianos('');
@@ -87,57 +98,46 @@ const HomeScreem = () => {
 
   const handlePress = async () => {
     try {
-      const response = await axios.post("http://192.168.2.8:3000/cliente", {
+      const responseCliente = await axios.post("http://192.168.2.30:4000/clientes", {
         nombre: nombreCliente,
         telefono: telefonoCliente,
-        plazo: parseInt(plazo),
-        precious: precioDolares,
-        inicialbs: inicialBolivianos,
-        cuota_mes: calcularCuotaMensual(),
-        id_motos: selectedValue,
-        id_asesores: id_asesores,
-        id_sucursal: id_sucursal,
       });
+
+      if (responseCliente.data && responseCliente.data.id_cliente) {
+        const idCliente = responseCliente.data.id_cliente;
+
+        await axios.post("http://192.168.2.30:4000/proforma", {
+          id_cliente: idCliente,
+          id_motos: selectedValue,
+          id_asesores: id_asesores,
+          id_sucursal: id_sucursal,
+          plazo: parseInt(plazo),
+          precious: precioDolares,
+          inicialbs: inicialBolivianos,
+          cuota_mes: calcularCuotaMensual()
+      });
+      } else {
+        Alert.alert("Error", "No se pudo almacenar el nuevo cliente");
+    }
       setShowAlert(true);
       setModalVisible(true);
-    } catch (error) {
-      console.error("Error al procesar la proforma", error);
-      Alert.alert("Error", "No se pudieron almacenar los datos");
+    } catch (err) {
+      Alert.alert("Error", "Faltan campos por ingresar");
     }
   };
 
-// GET CUOTA FIJA
-
-const fetchCostoVarios = async () => {
-  try {
-    const response = await axios.get('http://192.168.2.8:3000/costo');
-
-    if (Array.isArray(response.data) && response.data.length > 0) {
-      setCostoVarios(response.data[0]); 
-    } else {
-      console.error("Datos no esperados de la API");
-    }
-  } catch (error) {
-    console.error("Error en la consulta", error);
-  }
-};
-
-useEffect(() => {
-  fetchMoto();
-  fetchCostoVarios();
-},[]);
 
 
   // CUOTA MENSUAL
 
   const calcularCuotaMensual = () => {
+
     const costoMoto = precioDolares
     const descuentoIncial = 700
     const inicialBs = (inicialBolivianos - descuentoIncial) / tipoCambio
-    const interesAnual = costoVarios.interes_anual / 12
-    const costoFormulario = costoVarios.formulario / tipoCambio
+    const interesAnual = costoVarios[0].interes_anual / 12
+    const costoFormulario = costoVarios[0].formulario / tipoCambio
     const plazoMes = plazo
-
     const montoFinanciando = costoMoto - inicialBs
     const factorInteres = Math.pow(1 + interesAnual, plazoMes)
     const cuotaMensual = (montoFinanciando * interesAnual * factorInteres) / ( factorInteres - 1)

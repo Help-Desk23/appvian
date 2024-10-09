@@ -26,14 +26,12 @@ const Proforma = ({ nombre, modelo, plazo, precioDolares, precioBolivianos, inic
   const captureAndSave = async () => {
     try {
       const uri = await viewShotRef.current.capture();
-      console.log("Imagen guardada en:", uri);
 
       const fileUri = `${FileSystem.documentDirectory}proforma.png`;
       await FileSystem.moveAsync({
         from: uri,
         to: fileUri,
       });
-      console.log('Imagen movida a:', fileUri);
 
       const permission = await MediaLibrary.requestPermissionsAsync();
       if (permission.granted) {

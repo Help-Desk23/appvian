@@ -23,7 +23,7 @@ import Loading from './components/loading';
 
 function LoginScreem (){
 
-  const url = 'http://192.168.2.8:3000/login';
+  const url = 'http://192.168.2.30:4000/login';
 
   const [usuario, setUsername] = React.useState('');
   const [contraseña, setPassword] = React.useState('');
@@ -51,7 +51,6 @@ function LoginScreem (){
       console.log(response.data)
     })
     .catch(error => {
-      console.error(error)
       Alert.alert('Usuario o Contraseña Incorrecta')
     })
   }
